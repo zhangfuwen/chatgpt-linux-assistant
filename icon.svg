@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="200" height="200" viewBox="0 0 100 100">
+  <!-- 小企鹅 -->
+  <circle cx="30" cy="60" r="20" fill="#000"/>
+  <circle cx="30" cy="50" r="15" fill="#fff"/>
+  <circle cx="25" cy="45" r="3" fill="#000"/>
+  <circle cx="35" cy="45" r="3" fill="#000"/>
+  <path d="M30 55 Q25 60, 30 65 Q35 60, 30 55" fill="#FFD700"/>
+  
+  <!-- 齿轮 -->
+  <g transform="translate(60, 45) rotate(45)">
+    <circle cx="0" cy="0" r="20" fill="#000"/>
+    <circle cx="0" cy="0" r="15" fill="#fff"/>
+    <path d="M0 -15 L0 -10 L5 -10 L5 0 L10 0 L10 5 L0 5 L0 10 L-10 10 L-10 0 L-5 0 L-5 -10 L0 -10 L0 -15" fill="#000"/>
+  </g>
+</svg>
