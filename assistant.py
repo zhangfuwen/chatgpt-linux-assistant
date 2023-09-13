@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import traceback
 from revChatGPT.V3 import Chatbot
 import json
 import subprocess
@@ -50,75 +51,6 @@ with open("system_prompt.txt", 'r') as sprompt:
 #Connect to the openAI API using your API key
 chatbot = Chatbot(api_key="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", system_prompt=system_prompt)
 
-
-#Main loop
-# while True:
-#     zenity_command = ["zenity", "--entry", "--title", "Input Dialog", "--text", "Enter your name:", "--entry-text", "s"]
-
-#     result = subprocess.run(zenity_command, capture_output=True, text=True)
-#     user_input = result.stdout.strip()
-#     if user_input:
-#         save_history(user_input)  # 保存用户输入到历史记录
-#         print("User input:", user_input)
-#     else:
-#         print("No input entered.")
-#         break
-
-#     prompt = user_input
-
-#     #This part checks whether or not the user typed exit or quit
-#     #to exit the script
-#     if prompt.lower().strip() in ['exit', 'quit']:
-#         exit(0)
-
-#     #And here the query/request/question is sent to chatGPT
-#     while True:
-#         try:
-#             response = chatbot.ask("Human: " + prompt)
-#             break
-#         except:
-#             time.sleep(5)
-#             continue
-
-#     #This is in a loop for future proofing reasons in case
-#     #chatGPT decides to run another command after running a previous
-#     #one, before responding to the user so that the script is not broken.
-
-#     while True:
-#         if "@Backend" in response:
-#             #Extract the command that chatGPT wants to run and 
-#             #deserialize it.
-#             res = response.split("@Backend")[1]
-#             if debug:
-#                 print(res)
-#             #if "Backend:" in res and "Proxy Natural Language Processor:" in res:
-#             #	print(chatbot.ask("DO NOT REPLY AS BACKEND PLEASE. ONLY REPLY as Proxy Natural Language Processor."))
-#             #	break
-#             json_str = json.loads(res)
-#             command = json_str['command']
-
-#             print("Running command [%s] ..."%(command))
-#             #Run the command and store it's outputs for later
-#             p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True) 
-#             output, err = p.communicate()
-#             #Get the exit code
-#             exit_code = p.wait()
-#             #Send the command results to chatGPT so it can be interpreted by it.
-#             try:
-#                 response = chatbot.ask('Backend: {"STDOUT":"%s", "EXITCODE":"%s"}'%(output, exit_code))
-#             except:
-#                 print(f"exception occurred")
-#                 continue
-#         elif "@Human" in response:
-#             if debug:
-#                 print(response)
-#             chatGPT_reply = "Response:: " + response.split("@Human")[1]
-#             print(chatGPT_reply)
-#             break
-#         else:
-#             print("UNEXPECTED RESPONSE:: [%s]"%(response))
-#             break
-
 import tkinter as tk
 from tkinter import font
 
@@ -129,9 +61,14 @@ async def HumanAsk(prompt):
             print("human ask:", prompt)
             response = await chatbot.ask_async("Human: " + prompt)
             print("human ask done, " + response)
-            process_response(response)
+            try:
+                process_response(response)
+            except:
+                print(f"response error")
+                break
             break
         except:
+            traceback.print_exc()
             print("error")
             time.sleep(5)
             continue
@@ -149,7 +86,11 @@ def process_response(response):
             #if "Backend:" in res and "Proxy Natural Language Processor:" in res:
             #	print(chatbot.ask("DO NOT REPLY AS BACKEND PLEASE. ONLY REPLY as Proxy Natural Language Processor."))
             #	break
-            json_str = json.loads(res)
+            try:
+                json_str = json.loads(res)
+            except:
+                print(f"json error")
+
             command = json_str['command']
 
             print("Running command [%s] ..."%(command))
@@ -189,6 +130,12 @@ def append_input():
     append_text(text)
     asyncio.run(new_task(text))
 
+def handle_shift_enter(event):
+    print(f"enter ", event)
+    if (event.state | 1) and event.keycode == 36:  # 检查Shift+Enter的键码
+        print("Shift+Enter pressed")
+        append_input()
+
 async def new_task(text):
     print("new_task")
     asyncio.create_task(HumanAsk(text))
@@ -214,7 +161,12 @@ text_display.grid(row=0, column=0, columnspan=2)
 
 # 创建输入框
 entry = tk.Entry(window, font=custom_font)
-entry.grid(row=1, column=0)
+entry.grid(row=1, column=0, sticky="nsew")
+window.columnconfigure(0, weight=1) 
+entry.bind("<Shift-Return>", handle_shift_enter)
+entry.bind("<Shift-Enter>", handle_shift_enter)
+entry.bind("<Return>", handle_shift_enter)
+entry.bind("<Enter>", handle_shift_enter)
 
 # 创建追加按钮
 button = tk.Button(window, text="追加", command=append_input, font=custom_font)
