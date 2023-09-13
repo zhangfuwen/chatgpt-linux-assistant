@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=gpt assistant
+Comment=This is a description of my application
+Exec=/bin/bash -i /home/zhangfuwen/Code/conda-envs/chatgpt-linux-assistant/run.sh
+Icon=/home/zhangfuwen/Code/conda-envs/chatgpt-linux-assistant/icon.svg
+Terminal=false
+Type=Application
+Categories=Utility;
